@@ -2,7 +2,7 @@
   "name": "chentao",
   "data": {
     "a": 1,
-    "b": [1, 2, 3],
-    "c": false
+    "b": false,
+    "c": [1, 2, 3]
   }
 }

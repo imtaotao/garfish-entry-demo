@@ -9,10 +9,7 @@
     #appContainer {
       width: 80%;
       height: 500px;
-      overflow: hidden;
       margin: 100px auto;
-      border-radius: 5px;
-      border: 1px solid #ddd;
     }
   </style>
 </head>
@@ -29,16 +26,19 @@
     Garfish = Garfish.default;
 
     // 扩展 entry 协议的插件
-    function ExternalEntryPlugin(Garfish) {
-      const name = 'ExternalEntryPlugin';
-
-      // 允许 img entry
-      const processImg = (data) => {
-        const code = `<img src="${data.result.url}" width="100%"/>`
+    function EntryPlugin(Garfish) {
+      const name = 'EntryPlugin';
+      const transformManager = (data, code) => {
         const manager = new Garfish.loader.TemplateManager(code, data.result.url);
         data.value.code = code;
         data.value.fileType = 'template'
         data.value.resourceManager = manager;
+      }
+
+      // 允许 img entry
+      const processImg = (data) => {
+        const code = `<img src="${data.result.url}" width="100%"/>`
+        transformManager(data, code);
       }
 
       // 允许 json entry
@@ -51,10 +51,12 @@
             }
           <\/script>
         `
-        const manager = new Garfish.loader.TemplateManager(code, data.value.url);
-        data.value.code = code;
-        data.value.fileType = 'template';
-        data.value.resourceManager = manager;
+        transformManager(data, code);
+      }
+
+      const processExportJs = (data) => {
+        const code = '<div>打开控制可以看到输出</div>';
+        transformManager(data, code);
       }
 
       Garfish.loader.hooks.usePlugin({
@@ -64,6 +66,8 @@
             processImg(data);
           } else if (data.value.url.endsWith('.json')) {
             processJson(data);
+          } else if (data.value.url.endsWith('jsExport.js')) {
+            processExportJs(data);
           }
           return data;
         },
@@ -73,13 +77,13 @@
 
     // 启动 Garfish
     let prevApp;
-    Garfish.run({ plugins: [ExternalEntryPlugin] });
+    Garfish.run({ plugins: [EntryPlugin] });
   
     async function load(name, entry) {
       prevApp && prevApp.unmount();
       const app = await Garfish.loadApp(name, {
         entry,
-        noCheckProvider: true,
+        noCheckProvider: true, // 可以不检查 provider
         domGetter: '#appContainer',
       });
       prevApp = app;
@@ -105,7 +109,7 @@
     }
 
     document.getElementById('loadPPT').onclick = async function() {
-      await load('ppt', 'https://imtaotao.github.io/co-share');
+      await load('ppt', 'https://imtaotao.github.io/co-share/');
     }
   </script>
 </body>
