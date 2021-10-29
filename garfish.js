@@ -2772,13 +2772,13 @@ var Garfish = (() => {
         if (isModule2) {
           fileType = FileTypes.module;
           managerCtor = ModuleManager;
-        } else if (isHtml(mimeType) || /\.html/.test(result.url)) {
+        } else if (isHtml(mimeType) || /\.html$/.test(result.url)) {
           fileType = FileTypes.template;
           managerCtor = TemplateManager;
-        } else if (isJs(mimeType) || /\.js/.test(result.url) || isJsonp(mimeType, result.url)) {
+        } else if (isJs(mimeType) || /\.js$/.test(result.url) || isJsonp(mimeType, result.url)) {
           fileType = FileTypes.js;
           managerCtor = JavaScriptManager;
-        } else if (isCss(mimeType) || /\.css/.test(result.url)) {
+        } else if (isCss(mimeType) || /\.css$/.test(result.url)) {
           fileType = FileTypes.css;
           managerCtor = StyleManager;
         }
@@ -3215,18 +3215,22 @@ var Garfish = (() => {
     }
     callRender(provider, isMount) {
       const { appInfo, rootElement } = this;
-      provider && provider.render({
-        dom: rootElement,
-        basename: appInfo.basename,
-        appRenderInfo: { isMount }
-      });
+      if (provider && provider.render) {
+        provider.render({
+          dom: rootElement,
+          basename: appInfo.basename,
+          appRenderInfo: { isMount }
+        });
+      }
     }
     callDestroy(provider, isUnmount) {
       const { rootElement, appContainer } = this;
-      provider && provider.destroy({
-        dom: rootElement,
-        appRenderInfo: { isUnmount }
-      });
+      if (provider && provider.destroy) {
+        provider.destroy({
+          dom: rootElement,
+          appRenderInfo: { isUnmount }
+        });
+      }
       this.entryManager.DOMApis.removeElement(appContainer);
     }
     async addContainer() {

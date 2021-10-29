@@ -9,6 +9,7 @@
     #appContainer {
       width: 80%;
       height: 500px;
+      overflow: hidden;
       margin: 100px auto;
       border-radius: 5px;
       border: 1px solid #ddd;
@@ -27,27 +28,55 @@
   <script>
     Garfish = Garfish.default;
 
-    function JsonEntryPlugin(Garfish) {
-      return {
-        name: 'JsonEntryPlugin',
+    // 扩展 entry 协议的插件
+    function ExternalEntryPlugin(Garfish) {
+      const name = 'ExternalEntryPlugin';
+
+      // 允许 img entry
+      const processImg = (data) => {
+        const code = `<img src="${data.result.url}" width="100%"/>`
+        const manager = new Garfish.loader.TemplateManager(code, data.result.url);
+        data.value.code = code;
+        data.value.fileType = 'template'
+        data.value.resourceManager = manager;
       }
+
+      // 允许 json entry
+      const processJson = (data) => {
+        const code = `
+          <div>${data.value.code}</div>
+          <script>
+            exports.provider = {
+              jsonData: ${data.value.code},
+            }
+          <\/script>
+        `
+        const manager = new Garfish.loader.TemplateManager(code, data.value.url);
+        data.value.code = code;
+        data.value.fileType = 'template';
+        data.value.resourceManager = manager;
+      }
+
+      Garfish.loader.hooks.usePlugin({
+        name,
+        loaded(data) {
+          if (data.value.url.endsWith('.jpg')) {
+            processImg(data);
+          } else if (data.value.url.endsWith('.json')) {
+            processJson(data);
+          }
+          return data;
+        },
+      })
+      return { name };
     }
 
-    function ImgEntryPlugin(Garfish) {
-      return {
-        name: 'ImgEntryPlugin',
-      }
-    }
-
-    function JsExportPlugin(Garfish) {
-      return {
-        name: 'JsExportPlugin',
-      }
-    }
-
+    // 启动 Garfish
     let prevApp;
-    Garfish.run({ plugins: [JsonEntryPlugin, ImgEntryPlugin, JsExportPlugin] });
+    Garfish.run({ plugins: [ExternalEntryPlugin] });
+  
     async function load(name, entry) {
+      prevApp && prevApp.unmount();
       const app = await Garfish.loadApp(name, {
         entry,
         noCheckProvider: true,
@@ -58,16 +87,21 @@
       return app;
     }
 
+    // 通过 garfish 加载不同的入口
     document.getElementById('loadImg').onclick = async function() {
       await load('img', './entry/imgEntry.jpg');
     }
 
     document.getElementById('loadJson').onclick = async function() {
-      await load('json', './entry/jsonEntry.jpg');
+      const app = await load('json', './entry/jsonEntry.json');
+      const { jsonData } = await app.getProvider();
+      console.log(jsonData);
     }
 
     document.getElementById('loadJsExport').onclick = async function() {
-      await load('jsExport', './entry/imgEntry.jpg');
+      const app = await load('jsExport', './entry/jsExport.js');
+      const exports = app.cjsModules.exports;
+      console.log(exports);
     }
 
     document.getElementById('loadPPT').onclick = async function() {
