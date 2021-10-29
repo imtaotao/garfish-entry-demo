@@ -55,7 +55,11 @@
       }
 
       const processExportJs = (data) => {
-        const code = '<div>打开控制可以看到输出</div>';
+        // 这里不能改为 src，因为当前 url 的资源以及被此时的插件更改为了 html 资源
+        const code = `
+          <div>打开控制可以看到输出</div>
+          <script>${data.value.resourceManager.scriptCode}<\/script>
+        `;
         transformManager(data, code);
       }
 
@@ -106,6 +110,7 @@
       const app = await load('jsExport', './entry/jsExport.js');
       const exports = app.cjsModules.exports;
       console.log(exports);
+      exports.add(1, 2)
     }
 
     document.getElementById('loadPPT').onclick = async function() {
