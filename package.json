@@ -1,0 +1,12 @@
+{
+  "name": "garfish-examples",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "http-server ./ -o"
+  },
+  "author": "imtaotao",
+  "license": "MIT",
+  "dependencies": {
+    "http-server": "^14.0.0"
+  }
+}

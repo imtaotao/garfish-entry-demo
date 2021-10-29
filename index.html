@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Garfish demo</title>
+  <style>
+    #appContainer {
+      width: 80%;
+      height: 500px;
+      margin: 100px auto;
+      border-radius: 5px;
+      border: 1px solid #ddd;
+    }
+  </style>
+</head>
+<body>
+  <button id='loadImg'>加载 img 子应用</button><br/>
+  <button id='loadJson'>加载 json 子应用</button><br/>
+  <button id='loadJsExport'>加载 js export</button><br/>
+  <button id='loadPPT'>加载 co-share ppt</button><br/>
+  <div id="appContainer"></div>
+
+  <!-- <script src="https://unpkg.com/garfish@1.0.17/dist/iife/index.js"></script> -->
+  <script src="./garfish.js"></script>
+  <script>
+    Garfish = Garfish.default;
+
+    function JsonEntryPlugin(Garfish) {
+      return {
+        name: 'JsonEntryPlugin',
+      }
+    }
+
+    function ImgEntryPlugin(Garfish) {
+      return {
+        name: 'ImgEntryPlugin',
+      }
+    }
+
+    function JsExportPlugin(Garfish) {
+      return {
+        name: 'JsExportPlugin',
+      }
+    }
+
+    let prevApp;
+    Garfish.run({ plugins: [JsonEntryPlugin, ImgEntryPlugin, JsExportPlugin] });
+    async function load(name, entry) {
+      const app = await Garfish.loadApp(name, {
+        entry,
+        noCheckProvider: true,
+        domGetter: '#appContainer',
+      });
+      prevApp = app;
+      await app.mount();
+      return app;
+    }
+
+    document.getElementById('loadImg').onclick = async function() {
+      await load('img', './entry/imgEntry.jpg');
+    }
+
+    document.getElementById('loadJson').onclick = async function() {
+      await load('json', './entry/jsonEntry.jpg');
+    }
+
+    document.getElementById('loadJsExport').onclick = async function() {
+      await load('jsExport', './entry/imgEntry.jpg');
+    }
+
+    document.getElementById('loadPPT').onclick = async function() {
+      await load('ppt', 'https://imtaotao.github.io/co-share');
+    }
+  </script>
+</body>
+</html>
