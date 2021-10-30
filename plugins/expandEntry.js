@@ -1,5 +1,5 @@
-function EntryPlugin(Garfish) {
-  const name = 'EntryPlugin';
+function ExpandEntryPlugin(Garfish) {
+  const name = 'ExpandEntryPlugin';
   const transformManager = (data, code) => {
     const manager = new Garfish.loader.TemplateManager(code, data.result.url);
     data.value.code = code;

@@ -23,13 +23,16 @@
   <!-- <script src="https://unpkg.com/garfish@1.0.17/dist/iife/index.js"></script> -->
   <script src="./garfish.js"></script>
   <script src="./plugins/expandEntry.js"></script>
+  <script src="./plugins/storageWhitelist.js"></script>
   <script>
     Garfish = Garfish.default;
-
+    // 注册插件
+    Garfish.usePlugin(ExpandEntryPlugin);
+    Garfish.usePlugin(StorageWhitelistPlugin, ['tao']); // 可以添加白名单
     // 启动 Garfish
+    Garfish.run();
+
     let prevApp;
-    Garfish.run({ plugins: [EntryPlugin] });
-  
     async function load(name, entry) {
       prevApp && prevApp.unmount();
       const app = await Garfish.loadApp(name, {
